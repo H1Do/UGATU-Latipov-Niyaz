@@ -1,0 +1,49 @@
+#include <iostream>
+
+using std::cin;
+using std::cout;
+
+void ArrIn(int* Arr, int Size){
+    int In;
+    for (int i = 0; i < Size; i++) {
+        cin >> In;
+        *(Arr + i) = In;
+    }
+}
+
+int main() {
+    int SizeA;
+    std::cin >> SizeA;
+    int* A = new int[SizeA];
+    ArrIn(A, SizeA);
+
+    int SizeB;
+    std::cin >> SizeB;
+    int* B = new int[SizeB];
+    ArrIn(B, SizeB);
+
+    int k;
+    std::cin >> k;
+
+    int result = 0;
+    int i = 0, j = SizeB - 1;
+    // По массиву B проходим от конца к началу
+    // В случай совпадения, идем по А дальше.
+    // Если сумма больше k, идем по B (Так как B - убывающий массив, реверснутый возрастающий, мы уменьшаем сумму)
+    // Если сумма меньше k, идем по А (Так как А - возрастающий массив, и мы увеличиваем сумму)
+    while (i < SizeA && j >= 0) {
+        int Sum = *(A + i) + *(B + j);
+        if (Sum > k) {
+            j--;
+        }
+        else if (Sum < k) {
+            i++;
+        }
+        else if (Sum == k) {
+            result++;
+            i++;
+        }
+    }
+
+    cout << result;
+}
