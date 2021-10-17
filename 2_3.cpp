@@ -1,3 +1,5 @@
+//54868164
+//https://contest.yandex.ru/contest/29212/problems/2_3/
 #include <iostream>
 
 using std::cin;
@@ -43,6 +45,8 @@ int main() {
       i++;
     }
   }
-
+  
+  delete[] B;
+  delete[] A;
   cout << result;
 }
