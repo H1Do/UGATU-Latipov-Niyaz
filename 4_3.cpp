@@ -1,4 +1,6 @@
-﻿#include <assert.h>
+//54870046
+//https://contest.yandex.ru/contest/29212/problems/4_3
+#include <assert.h>
 #include <iostream>
 
 using namespace std;
@@ -41,35 +43,44 @@ int Stack::pop() {
 
 int Stack::Size() { return top; }
 
-int main() {
+class Queue {
+private:
   Stack A = Stack(1000000);
   Stack B = Stack(1000000);
+
+public:
+  void push(int el) { A.push(el); }
+
+  int pop() {
+    int size = A.Size();
+    if (B.empty())
+      for (int i = 0; i < size + 1; i++)
+        B.push(A.pop());
+    return B.pop();
+  }
+};
+
+int main() {
+  Queue A;
 
   int k;
   cin >> k;
   for (int i = 0; i < k; i++) {
     int In;
     int elem;
-    int selem;
     cin >> In;
     if (In == 3) {
       cin >> elem;
       A.push(elem);
     } else if (In == 2) {
       cin >> elem;
-      int selem;
-      int Size = A.Size();
-      if (B.empty() == true) {
-        for (int i = 0; i < Size + 1; i++) {
-          B.push(A.pop());
-        }
-      }
-      if (B.pop() != elem) {
+      if (A.pop() != elem) {
         cout << "NO";
         return 0;
       }
     }
   }
+
   cout << "YES";
   return 0;
 }
