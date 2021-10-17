@@ -1,3 +1,5 @@
+//54868485
+//https://contest.yandex.ru/contest/29212/problems/3_4/
 #include <iostream>
 
 using std::cin;
@@ -10,7 +12,7 @@ void ArrIn(int *arr, int size) {
     *(arr + i) = In;
   }
 }
-
+//Бинарный поиск ближайшего к заданному элементу
 int BinarySearchClosest(int *arr, int elem, int size) {
   int left = 0;
   int right = size;
