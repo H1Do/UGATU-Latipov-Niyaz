@@ -1,3 +1,5 @@
+//53566299
+//https://contest.yandex.ru/contest/29212/problems/1_3/
 #include <iostream>
 
 //Сокращение дробей с их выводом в консоль
