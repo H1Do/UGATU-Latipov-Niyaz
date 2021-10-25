@@ -136,4 +136,5 @@ int main() {
     A.push_back(char(B.pop()));
   }
   cout << CALC(A);
+  return 0;
 }
