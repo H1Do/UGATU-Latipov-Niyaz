@@ -46,4 +46,5 @@ int main() {
   for (int i = 0; i < SizeB; i++) {
     cout << BinarySearchClosest(A, *(B + i), SizeA) << " ";
   }
+  return 0;
 }
