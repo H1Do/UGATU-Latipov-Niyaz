@@ -1,5 +1,5 @@
 // 54868164
-// https://contest.yandex.ru/contest/29212/problems/2_3/
+// https://contest.yandex.ru/contest/29212/problems/2_3
 #include <iostream>
 
 int necessary_sum(int *a, int *b, int size_a, int size_b, int k) {
