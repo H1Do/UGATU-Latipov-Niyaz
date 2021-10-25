@@ -36,8 +36,7 @@ int main() {
 
   int k;
   std::cin >> k;
-
-  std::cout << necessary_sum(A, B, SizeA, SizeB, k);
+  std::cout << necessary_sum(A, B, SizeA, SizeB, k) << std::endl;
 
   delete[] B;
   delete[] A;
