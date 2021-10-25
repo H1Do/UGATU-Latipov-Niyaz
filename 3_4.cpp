@@ -1,15 +1,12 @@
-// 55377775
+// 55396512
 // https://contest.yandex.ru/contest/29212/problems/3_4/
 #include <iostream>
 
-// For я использую для того, чтобы в случай отсутсвия нужного элемента (когда мы
-// ищем ближайший по значению) Цикл While не уходил в бесконечный цикл. В For
-// число 17, так как (110000 / 2 ^ 17) < 1. 110000 - макс. размер массива А по условию.
 int BinarySearchClosest(int *arr, int elem, int size) {
   int left = 0;
   int right = size;
   int mid;
-  for (int i = 0; i < 17; i++) {
+  while (right - left > 1) {
     mid = (right + left) / 2;
     if (arr[mid] > elem)
       right = mid;
