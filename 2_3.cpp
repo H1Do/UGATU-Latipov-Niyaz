@@ -49,4 +49,5 @@ int main() {
   delete[] B;
   delete[] A;
   cout << result;
+  return 0;
 }
