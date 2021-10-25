@@ -8,16 +8,12 @@ int BinarySearchClosest(int *arr, int elem, int size) {
   int mid;
   while (right - left > 1) {
     mid = (right + left) / 2;
-    if (arr[mid] > elem)
-      right = mid;
-    else
-      left = mid;
+    (arr[mid] > elem) ? right = mid : left = mid;
   }
-  if (left != right) {
-    if (std::abs(arr[left] - elem) <= std::abs(arr[right] - elem)) {
+  if (left == right) {
       return left;
-    }
-    return right;
+  } else {
+    return (std::abs(arr[left] - elem) <= std::abs(arr[right] - elem)) ? left : right;
   }
 }
 
