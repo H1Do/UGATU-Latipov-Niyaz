@@ -1,23 +1,41 @@
-//53566299
-//https://contest.yandex.ru/contest/29212/problems/1_3/
+// 55374309
+// https://contest.yandex.ru/contest/29212/problems/1_3/
 #include <iostream>
 
-//Сокращение дробей с их выводом в консоль
-void socr_drob(int ch, int zn) {
-  for (int i = ch; i > 1; i--) {
-    if (ch % i == 0 && zn % i == 0) {
-      ch = ch / i;
-      zn = zn / i;
+class fraction {
+public:
+    int nomerator;
+    int denominator;
+};
+
+// greatest common divisor calculating
+int GCD(int a, int b) {
+    while (a != b) {
+        if (a > b)
+            a = a - b;
+        else
+            b = b - a;
     }
-  }
-  std::cout << ch << " " << zn;
+    return a;
+}
+
+fraction calculating_fractions(int a, int b, int c, int d) {
+    int nomerator = a * d + c * b;
+    int denominator = b * d;
+    int divisor = GCD(nomerator, denominator);
+    nomerator /= divisor;
+    denominator /= divisor;
+    fraction ans;
+    ans.denominator = denominator;
+    ans.nomerator = nomerator;
+    return ans;
 }
 
 int main() {
-  int a, b, c, d;
-  std::cin >> a >> b >> c >> d;
-  int chislitel = a * d + c * b;
-  int znamenatel = b * d;
-  socr_drob(chislitel, znamenatel);
-  return 0;
+    int a, b, c, d;
+    std::cin >> a >> b >> c >> d;
+
+    fraction ans = calculating_fractions(a, b, c, d);
+    std::cout << ans.nomerator << ' ' << ans.denominator << '\n';
+    return 0;
 }
