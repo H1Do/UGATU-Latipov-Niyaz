@@ -19,4 +19,5 @@ int main() {
   int chislitel = a * d + c * b;
   int znamenatel = b * d;
   socr_drob(chislitel, znamenatel);
+  return 0;
 }
