@@ -1,10 +1,7 @@
-//54870888
-//https://contest.yandex.ru/contest/29212/problems/5_4
+// 55488550
+// https://contest.yandex.ru/contest/29212/problems/5_4/
 #include <iostream>
 #include <string>
-#icnlude <cassert>
-
-using namespace std;
 
 int Prior(char op) {
   if (op == '*' || op == '/')
@@ -15,126 +12,137 @@ int Prior(char op) {
 }
 
 class Stack {
-private:
-  int buffer_size;
-  int *buffer;
-  int top;
-
 public:
-  explicit Stack(int _buffer_size);
+  Stack();
   ~Stack();
 
   void push(int a);
   int pop();
 
   bool empty() const { return top == -1; }
+  int Size();
+  int Top();
 
-  int size();
-  int TOP();
+private:
+  int *buffer;
+  int buffer_size;
+  int top;
+  void BufferBoost();
 };
 
-Stack::Stack(int _buffer_size) : buffer_size(_buffer_size), top(-1) {
-  buffer = new int[buffer_size];
-}
+Stack::Stack() : buffer_size(16), top(-1), buffer(new int[16]) {}
 
 Stack::~Stack() { delete[] buffer; }
 
 void Stack::push(int a) {
-  assert(top < buffer_size - 1);
+  if (top >= buffer_size - 1)
+    BufferBoost();
   buffer[++top] = a;
 }
 
-int Stack::pop() {
-  if (top != -1)
-    return buffer[top--];
-  else
-    return -1;
+int Stack::pop() { return (top == -1) ? -1 : buffer[top--]; }
+
+int Stack::Top() { return buffer[top]; }
+
+int Stack::Size() { return top; }
+
+void Stack::BufferBoost() {
+  int new_buffer_size = buffer_size * 2;
+  int *new_buffer = new int[new_buffer_size];
+  for (int i = 0; i < buffer_size; i++) {
+    new_buffer[i] = buffer[i];
+  }
+  delete[] buffer;
+  buffer = new_buffer;
+  buffer_size = new_buffer_size;
 }
 
-int Stack::size() { return top; }
-
-int Stack::TOP() { return *(buffer + top); }
-
-int CALC(string a) {
-  int Iel;
-  int IIel;
-  bool isFrstINT = true;
-  Stack A = Stack(400);
+int Calculate(std::string Postfyx) {
+  int first_int;
+  int second_int;
+  bool is_first_int = true;
+  Stack stack;
   int temp = 0;
 
-  for (int i = 0; i < (int)a.size(); i++) {
-    if (a[i] >= '0' && a[i] <= '9') {
-      if (isFrstINT) {
-        isFrstINT = false;
-        A.push(a[i] - '0');
+  for (int i = 0; i < (int)Postfyx.size(); i++) {
+    if (Postfyx[i] >= '0' && Postfyx[i] <= '9') {
+      if (is_first_int) {
+        is_first_int = false;
+        stack.push(Postfyx[i] - '0');
       } else {
-        temp = A.pop();
-        A.push(temp * 10 + a[i] - '0');
+        temp = stack.pop();
+        stack.push(temp * 10 + Postfyx[i] - '0');
       }
     } else {
-      if (a[i] == ' ')
-        isFrstINT = true;
+      if (Postfyx[i] == ' ')
+        is_first_int = true;
       else {
-        Iel = A.pop();
-        IIel = A.pop();
-        if (a[i] == '+') {
-          A.push(IIel + Iel);
-        } else if (a[i] == '-') {
-          A.push(IIel - Iel);
-        } else if (a[i] == '/') {
-          A.push(IIel / Iel);
-        } else if (a[i] == '*') {
-          A.push(IIel * Iel);
+        first_int = stack.pop();
+        second_int = stack.pop();
+        if (Postfyx[i] == '+') {
+          stack.push(second_int + first_int);
+        } else if (Postfyx[i] == '-') {
+          stack.push(second_int - first_int);
+        } else if (Postfyx[i] == '/') {
+          stack.push(second_int / first_int);
+        } else if (Postfyx[i] == '*') {
+          stack.push(second_int * first_int);
         }
       }
     }
   }
-  return A.TOP();
+  return stack.Top();
 }
 
-int main() {
-  string A;
-  Stack B = Stack(1000);
-  bool isInt = true;
+void inf_to_post(std::string &Postfyx, Stack &stack) {
+  bool is_int = true;
   char el;
 
-  while (scanf("%c", &el) == 1 && el != '\n') {
+  while ((el = getchar()) && (el != '\n')) {
     if (el >= '0' && el <= '9') {
-      isInt = true;
-      A.push_back(el);
+      is_int = true;
+      Postfyx.push_back(el);
     } else {
-      if (isInt) {
-        A.push_back(' ');
-        isInt = false;
+      if (is_int) {
+        Postfyx.push_back(' ');
+        is_int = false;
       }
       if (el == '(' || el == ')') {
         if (el == '(') {
-          B.push(el);
+          stack.push(el);
         } else {
-          while (B.TOP() != '(') {
-            A.push_back(char(B.pop()));
+          while (stack.Top() != '(') {
+            Postfyx.push_back(char(stack.pop()));
           }
-          B.pop();
+          stack.pop();
         }
       } else {
-        if (B.empty()) {
-          B.push(el);
+        if (stack.empty()) {
+          stack.push(el);
         } else {
-          while (!B.empty()) {
-            if (Prior(char(B.TOP())) >= Prior(el)) {
-              A.push_back(char(B.pop()));
+          while (!stack.empty()) {
+            if (Prior(char(stack.Top())) >= Prior(el)) {
+              Postfyx.push_back(char(stack.pop()));
             } else {
               break;
             }
           }
-          B.push(el);
+          stack.push(el);
         }
       }
     }
   }
-  while (!B.empty()) {
-    A.push_back(char(B.pop()));
+  while (!stack.empty()) {
+    Postfyx.push_back(char(stack.pop()));
   }
-  cout << CALC(A);
+}
+
+int main() {
+  std::string Postfix;
+  Stack stack;
+
+  inf_to_post(Postfix, stack);
+
+  std::cout << Calculate(Postfix);
   return 0;
 }
