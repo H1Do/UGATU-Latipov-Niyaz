@@ -8,7 +8,7 @@ int BinarySearchClosest(int *arr, int elem, int size) {
   int mid;
   while (right - left > 1) {
     mid = (right + left) / 2;
-    (arr[mid] > elem) ? right = mid : left = mid;
+    (arr[mid] > elem ? right : left) = mid;
   }
   if (left == right) {
       return left;
