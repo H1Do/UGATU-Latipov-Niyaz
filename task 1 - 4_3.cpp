@@ -1,4 +1,4 @@
-// 55485600
+// 55523761
 // https://contest.yandex.ru/contest/29212/problems/4_3
 #include <cassert>
 #include <iostream>
@@ -82,10 +82,8 @@ int main() {
   for (int i = 0; i < k; i++) {
     std::cin >> Elem.first >> Elem.second;
 
-    if (!testing(Elem, queue)) {
+    if (!testing(Elem, queue) && flag == true)
       flag = false;
-      break;
-    }
   }
 
   std::cout << (flag ? "YES" : "NO") << '\n';
