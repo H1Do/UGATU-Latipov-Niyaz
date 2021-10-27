@@ -82,7 +82,7 @@ int main() {
   for (int i = 0; i < k; i++) {
     std::cin >> Elem.first >> Elem.second;
 
-    if (!testing(Elem, queue) && flag == true)
+    if (flag && !testing(Elem, queue))
       flag = false;
   }
 
