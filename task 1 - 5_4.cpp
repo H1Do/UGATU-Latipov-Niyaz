@@ -12,7 +12,8 @@ int Prior(char op) {
   return -1;
 }
 
-template <typename T> class Stack {
+template <typename T> 
+class Stack {
 public:
   Stack();
   ~Stack();
@@ -34,23 +35,29 @@ private:
 template <typename T>
 Stack<T>::Stack() : buffer_size(16), top(-1), buffer(new int[16]) {}
 
-template <typename T> Stack<T>::~Stack() { delete[] buffer; }
+template <typename T> 
+Stack<T>::~Stack() { delete[] buffer; }
 
-template <typename T> void Stack<T>::push(T a) {
+template <typename T> 
+void Stack<T>::push(T a) {
   if (top >= buffer_size - 1)
     BufferBoost();
   buffer[++top] = a;
 }
 
-template <typename T> T Stack<T>::pop() {
+template <typename T> 
+T Stack<T>::pop() {
   return (top == -1) ? -1 : buffer[top--];
 }
 
-template <typename T> T Stack<T>::Top() const { return buffer[top]; }
+template <typename T> 
+T Stack<T>::Top() const { return buffer[top]; }
 
-template <typename T> int Stack<T>::Size() const { return top; }
+template <typename T> 
+int Stack<T>::Size() const { return top; }
 
-template <typename T> void Stack<T>::BufferBoost() {
+template <typename T> 
+void Stack<T>::BufferBoost() {
   int new_buffer_size = buffer_size * 2;
   int *new_buffer = new int[new_buffer_size];
   for (int i = 0; i < buffer_size; i++) {
