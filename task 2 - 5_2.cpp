@@ -1,30 +1,39 @@
 #include <string.h>
+
 #include <iostream>
 
-long long getMax(long long* Arr, int n) {
-  long long Max = Arr[0];
+// Максимальный элемент в массиве
+unsigned long long getMax(unsigned long long* Arr, int n) {
+  unsigned long long max = Arr[0];
   for (int i = 1; i < n; i++)
-    if (Arr[i] > Max) Max = Arr[i];
-  return Max;
+    if (Arr[i] > max) max = Arr[i];
+  return max;
 }
 
-void CountingSort(long long* Arr, int n, long long byte) {
-  int* CountOfNumbers = new int[256]{};
-  for (int i = 0; i < n; i++) CountOfNumbers[(Arr[i] / byte) % 256]++;
-  for (int i = 1; i < 256; i++) CountOfNumbers[i] += CountOfNumbers[i - 1];
-  long long* TempArr = new long long[n];
+// Сортировка подсчётом выбранного разряда (байта)
+void CountingSort(unsigned long long* Arr, int n, unsigned long long byte) {
+  int* count_of_numbers = new int[256]{};
+
+  for (int i = 0; i < n; i++) count_of_numbers[(Arr[i] / byte) % 256]++;
+  for (int i = 1; i < 256; i++) count_of_numbers[i] += count_of_numbers[i - 1];
+
+  unsigned long long* temporary_array = new unsigned long long[n];
   for (int i = n - 1; i >= 0; i--)
-    TempArr[--CountOfNumbers[(Arr[i] / byte) % 256]] = Arr[i];
-  delete[] CountOfNumbers;
-  memcpy(Arr, TempArr, n * sizeof(long long));
-  delete[] TempArr;
+    temporary_array[--count_of_numbers[(Arr[i] / byte) % 256]] = Arr[i];
+  
+  delete[] count_of_numbers;
+  memcpy(Arr, temporary_array, n * sizeof(unsigned long long));
+  delete[] temporary_array;
 }
 
-void LSDSort(long long* Arr, int n) {
-  long long Max = getMax(Arr, n);
-  for (long long i = 1; i < Max; i *= 256) {
-    if (i == 0) break;
-    CountingSort(Arr, n, i);
+// Сортировка LSD по байтам
+void LSDSort(unsigned long long* Arr, int n) {
+  unsigned long long max_number = getMax(Arr, n);
+  for (unsigned long long i = 1; i < max_number; i *= 256) {
+    if (i == 0) {
+      break;
+    } else
+      CountingSort(Arr, n, i);
   }
 }
 
@@ -32,12 +41,12 @@ int main() {
   int n;
   std::cin >> n;
 
-  long long* Arr = new long long[n];
-  for (int i = 0; i < n; i++) std::cin >> Arr[i];
+  unsigned long long* array = new unsigned long long[n];
+  for (int i = 0; i < n; i++) std::cin >> array[i];
 
-  LSDSort(Arr, n);
+  LSDSort(array, n);
 
-  for (int i = 0; i < n; i++) std::cout << Arr[i] << ' ';
+  for (int i = 0; i < n; i++) std::cout << array[i] << ' ';
   std::cout << '\n';
   return 0;
 }
