@@ -1,7 +1,7 @@
 // https://contest.yandex.ru/contest/30914/problems/3 Вариант с рандомным пивотом
 // 58155113
 #include <iostream>
-#include <queue>
+#include <vector>
 
 // Функция, выбирающая рандомный элемент и раскидывающая другие относительно
 // выбранного по возрастанию, слева меньше, справа больше
@@ -30,6 +30,7 @@ int KStatLinear(std::vector<int>& arr, int n) {
     else
       return arr[n];
   }
+  return 0;
 }
 
 int main() {
@@ -41,4 +42,5 @@ int main() {
   for (int i = 0; i < n; i++) std::cin >> array[i];
 
   std::cout << KStatLinear(array, k) << '\n';
+  return 0;
 }
