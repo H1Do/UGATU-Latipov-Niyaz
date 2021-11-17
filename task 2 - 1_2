@@ -1,0 +1,41 @@
+// https://contest.yandex.ru/contest/30914/problems/1_2
+// 58144945
+#include <algorithm>
+#include <iostream>
+#include <queue>
+
+struct Point {
+  int X;
+  int Y;
+};
+
+// Компаратор для сортировки младшего разряда, коим является Y
+bool compY(Point first, Point second) { return first.Y < second.Y; }
+
+// Компаратор для сортировки младшего разряда, коим является X
+bool compX(Point first, Point second) { return first.X < second.X; }
+
+// Как по LSD сортируем сначало по Y, потом по X.
+void PolylineCreate(std::vector<Point> &Points) {
+  std::stable_sort(Points.begin(), Points.end(), compY);
+  std::stable_sort(Points.begin(), Points.end(), compX);
+}
+
+int main() {
+  int k;
+  std::cin >> k;
+
+  std::vector<Point> Points;
+
+  Point In;
+  for (int i = 0; i < k; i++) {
+    std::cin >> In.X >> In.Y;
+    Points.push_back(In);
+  }
+
+  PolylineCreate(Points);
+
+  for (auto Pt : Points) {
+    std::cout << Pt.X << ' ' << Pt.Y << std::endl;
+  }
+}
