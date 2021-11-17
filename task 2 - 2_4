@@ -1,0 +1,52 @@
+// https://contest.yandex.ru/contest/30914/problems/2_4
+// 58151231
+#include <algorithm>
+#include <iostream>
+#include <queue>
+
+// В структуре описывается позиция события и его тип (вход или выход)
+struct IntervalEvent {
+  int position;
+  int type;
+};
+
+bool comp(IntervalEvent first, IntervalEvent second) {
+  return first.position < second.position;
+}
+
+int main() {
+  int k;
+  std::cin >> k;
+  std::vector<IntervalEvent> direct_events;
+
+  int In;
+  for (int i = 0; i < k; i++) {
+    std::cin >> In;
+    // Добавление события вхождения
+    IntervalEvent interval_start({In, 1});
+    direct_events.push_back(interval_start);
+    
+    std::cin >> In;
+    // Добавление события выхождения
+    IntervalEvent IntervalFinish({In, -1});
+    direct_events.push_back(IntervalFinish);
+  }
+
+  // Стабильная сортировка по позиции
+  std::stable_sort(direct_events.begin(), direct_events.end(), comp);
+
+  int ans = 0, type = 0, last_position = 0;
+
+  for (auto event : direct_events) {
+    // Проверка на нахождение в одном интервале
+    if (type == 1) {
+      ans += (event.position - last_position);
+    }
+
+    type += event.type;
+    last_position = event.position;
+  }
+
+  std::cout << ans << '\n';
+  return 0;
+}
