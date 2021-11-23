@@ -20,10 +20,10 @@ int main() {
 
   std::vector<std::pair<int, int>> points;
 
-  std::pair<int, int> In;
+  std::pair<int, int> input;
   for (int i = 0; i < k; i++) {
-    std::cin >> In.first >> In.second;
-    points.push_back(In);
+    std::cin >> input.first >> In.second;
+    points.push_back(input);
   }
 
   InsertionSort(points, k);
