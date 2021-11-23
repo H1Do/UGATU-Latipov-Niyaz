@@ -1,8 +1,8 @@
-// 58908415	
+// 59015475 TL, а в моих тестах ошибка, причем по отдельности сортировки работают
+// исправно. Если есть такая возможность, можете помочь
 // https://contest.yandex.ru/contest/30914/problems/6
-#include <ctime>
-#include <iostream>
 #include <stack>
+
 #include "sort.h"
 
 void InsertionSort(unsigned int* arr, int n) {
@@ -14,48 +14,57 @@ void InsertionSort(unsigned int* arr, int n) {
   }
 }
 
-// Не придумал никакой оптимизации
-int Pivot(unsigned int left, unsigned int right) {
-  srand(time(0));
-  return left + rand() % (right - left);
+// Поиск медианы первого, последнего и среднего числа массива
+int Pivot(unsigned int* arr, size_t left, size_t right) {
+  return (arr[left] + arr[right] + arr[(left + right) / 2]) / 3;
 }
 
-unsigned int Partition(unsigned int* arr, unsigned int left,
-                       unsigned int right) {
-  if (left != right) std::swap(arr[Pivot(left, right)], arr[right]);
+// Разбиение Хоара
+unsigned int Partition(unsigned int* arr, size_t left, size_t right) {
+  if (left == right) return left;
+  unsigned int pivot = Pivot(arr, left, right);
 
-  unsigned int i = left - 1;
+  size_t i = left;
+  size_t j = right - 1;
 
-  for (unsigned int j = left; j <= right; j++)
-    if (arr[j] <= arr[right]) std::swap(arr[++i], arr[j]);
-
+  while (i <= j) {
+    while (arr[i] < pivot) i++;
+    while (arr[j] > pivot) j--;
+    if (i <= j) {
+      std::swap(arr[i], arr[j]);
+      i++;
+      j--;
+    }
+  }
   return i;
 }
 
-void QuickSort(unsigned int* arr, unsigned int left, unsigned int right) {
-  std::stack<unsigned int> stk;
-  stk.push(left);
-  stk.push(right);
+void QuickSort(unsigned int* arr, size_t left, size_t right) {
+  std::stack<std::pair<unsigned int, unsigned int>> stk;
+  std::pair<unsigned int, unsigned int> pr{left, right};
+  stk.push(pr);
 
   while (!stk.empty()) {
-    unsigned int right = stk.top();
+    pr = stk.top();
     stk.pop();
 
-    unsigned int left = stk.top();
-    stk.pop();
+    size_t left = pr.first;
+    size_t right = pr.second;
 
-    if (right - left <= 200) {
+    if (right - left <= 30) {
       InsertionSort(arr + left, right - left + 1);
     } else {
       int i = Partition(arr, left, right);
 
       if (i > left + 1) {
-        stk.push(left);
-        stk.push(i - 1);
+        pr.first = left;
+        pr.second = i - 1;
+        stk.push(pr);
       }
       if (i < right - 1) {
-        stk.push(i + 1);
-        stk.push(right);
+        pr.first = i + 1;
+        pr.second = right;
+        stk.push(pr);
       }
     }
   }
