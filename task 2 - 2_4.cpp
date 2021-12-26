@@ -1,21 +1,30 @@
 // https://contest.yandex.ru/contest/30914/problems/2_4
-// 59023074
+// 63072078
 #include <iostream>
 #include <vector>
 
 // В структуре описывается позиция события и его тип (вход или выход)
 struct IntervalEvent {
-    int position;
-    int type;
+  int position;
+  int type;
+
+  friend bool operator<(IntervalEvent const &first, IntervalEvent const &second) {
+    return (first.position < second.position) ? true : false;
+  }
+
+  friend bool operator>(IntervalEvent const &first, IntervalEvent const &second) {
+    return (first.position > second.position) ? true : false;
+  }
 };
 
 // Пирамидальная сортировка для массива из IntervalEvent по position
-void SiftDown(std::vector<IntervalEvent>& arr, int size, int i) {
+template <typename T>
+void SiftDown(std::vector<T>& arr, int size, int i) {
   int left = 2 * i + 1;
   int right = 2 * i + 2;
   int largest = i;
-  if (left < size && arr[left].position > arr[i].position) largest = left;
-  if (right < size && arr[right].position > arr[largest].position) largest = right;
+  if (left < size && arr[left] > arr[i]) largest = left;
+  if (right < size && arr[right] > arr[largest]) largest = right;
   if (largest != i) {
     std::swap(arr[i], arr[largest]);
     SiftDown(arr, size, largest);
@@ -31,7 +40,7 @@ void HeapSort(std::vector<IntervalEvent>& arr, int size) {
 }
 
 // Подсчёт длинны окрашенной в один слой
-int one_line_length(std::vector<IntervalEvent>& direct_events) {
+int OneLineLength(std::vector<IntervalEvent>& direct_events) {
   int ans = 0, type = 0, last_position = 0;
 
   for (auto event : direct_events) {
@@ -57,13 +66,13 @@ int main() {
     direct_events.push_back(interval_start);
 
     std::cin >> input;
-    // Добавление события выхождения
-    IntervalEvent IntervalFinish({input, -1});
-    direct_events.push_back(IntervalFinish);
+    // Добавление события выхода
+    IntervalEvent interval_finish({input, -1});
+    direct_events.push_back(interval_finish);
   }
 
   HeapSort(direct_events, direct_events.size());
 
-  std::cout << one_line_length(direct_events) << '\n';
+  std::cout << OneLineLength(direct_events) << '\n';
   return 0;
 }
