@@ -1,7 +1,6 @@
 // 63045320	
 // https://contest.yandex.ru/contest/32613/problems/3_2
 #include <iostream>
-#include <cassert>
 
 // Структура узла дерева
 struct Node {
