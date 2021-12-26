@@ -8,12 +8,12 @@ struct IntervalEvent {
   int position;
   int type;
 
-  friend bool operator<(IntervalEvent const &first, IntervalEvent const &second) {
-    return (first.position < second.position) ? true : false;
+  friend bool operator<(const IntervalEvent &first, const IntervalEvent &second) {
+    return first.position < second.position;
   }
 
-  friend bool operator>(IntervalEvent const &first, IntervalEvent const &second) {
-    return (first.position > second.position) ? true : false;
+  friend bool operator>(const IntervalEvent &first, const IntervalEvent &second) {
+    return first.position > second.position;
   }
 };
 
