@@ -2,37 +2,46 @@
 // https://contest.yandex.ru/contest/32613/problems/2_2
 #include <iostream>
 #include <vector>
+#include <stack>
 
-// Структура узла дерева, как декартового, так и бинарного
-struct Node {
-  int data;
-  int priority;
-  Node *left, *right;
+// Класс дерева, как бинарного, так и декартового
+template <typename T>
+class Tree {
+ private:
+  T data_;
+  int priority_;
+  Tree *left_, *right_;
+
+ public:
   // Конструктор бинарного узла дерева
-  Node (int data) : data(data), left(nullptr), right(nullptr) { }
+  Tree(const T& data) : data_(data), left_(nullptr), right_(nullptr) { }
+
   // Конструктор декартового узла дерева
-  Node (int data, int priority) : data(data), priority(priority), left(nullptr),
-                                  right(nullptr) { }
+  Tree(const T& data, const int& priority) : data_(data), priority_(priority), left_(nullptr),
+                                  right_(nullptr) { }
+
   // Высота дерева
-  friend int Height(Node* node) {
+  friend int Height(Tree<T>* node) {
     if (node == nullptr)
       return 0;
 
-    int left = Height(node->left);
-    int right = Height(node->right);
+    int left = Height(node->left_);
+    int right = Height(node->right_);
 
     return ((left > right) ? left : right) + 1;
   }
+
   // Обход дерева в глубину с подсчётом кол-ва узлов разных высот
-  friend void DFS(Node* node, int node_height, std::vector<int>& heights) {
+  friend void DFS(Tree<T>* node, int node_height, std::vector<int>& heights) {
     if (node == nullptr)
       return;
     ++heights[node_height];
-    DFS(node->left, node_height + 1, heights);
-    DFS(node->right, node_height + 1, heights);
+    DFS(node->left_, node_height + 1, heights);
+    DFS(node->right_, node_height + 1, heights);
   }
+
   // Ширина деревьев
-  friend int Width(Node* node) {
+  friend int Width(Tree<T>* node) {
     int height = Height(node);
     std::vector<int>heights(height);
     DFS(node, 0, heights);
@@ -43,80 +52,83 @@ struct Node {
     }
     return max;
   }
-};
 
-// Функция разделения для декартового дерева
-void Split(Node* current_node, int key, Node*& left, Node*& right) {
-  if (current_node == nullptr) {
-    left = nullptr;
-    right = nullptr;
-  } else if (current_node->data < key) {
-    Split(current_node->right, key, current_node->right, right);
-    left = current_node;
-  } else {
-    Split(current_node->left, key, left, current_node->left);
-    right = current_node;
-  }
-}
-
-// Функция слияния для декартового дерева
-Node* Merge(Node* left, Node* right) {
-  if (left == nullptr || right == nullptr) {
-    return left == nullptr ? right : left;
-  }
-  if (left->priority > right->priority) {
-    left->right = Merge(left->right, right);
-    return left;
-  } else {
-    right->left = Merge(left, right->left);
-    return right;
-  }
-}
-
-// Вставка ключа для декартового дерева
-void InsertForCartesian(Node*& root, int value, int priority) {
-  Node* left;
-  Node* right;
-
-  Split(root, value, left, right);
-
-  Node* node = new Node(value);
-  node->priority = priority;
-
-  root = Merge(Merge(left, node), right);
-}
-
-// Вставка ключа для бинарного дерева
-void InsertForBinary(Node*& root, int value) {
-  Node* parent = root, *current = root;
-
-  while (current != nullptr) {
-    parent = current;
-
-    if(value < current->data) {
-      current = current->left;
-    } else if (value > current->data) {
-      current = current->right;
+  // Функция разделения для декартового дерева
+  friend void Split(Tree<T>* current_node, const int& key, Tree<T>*& left, Tree<T>*& right) {
+    if (current_node == nullptr) {
+      left = nullptr;
+      right = nullptr;
+    } else if (current_node->data_ < key) {
+      Split(current_node->right_, key, current_node->right_, right);
+      left = current_node;
+    } else {
+      Split(current_node->left_, key, left, current_node->left_);
+      right = current_node;
     }
   }
 
-  current = new Node(value);
-
-  if (root == nullptr) {
-    root = current;
-  } else if (value < parent->data) {
-    parent->left = current;
-  } else {
-    parent->right = current;
+  // Функция слияния для декартового дерева
+  friend Tree<T>* Merge(Tree<T>* left, Tree<T>* right) {
+    if (left == nullptr || right == nullptr) {
+      return left == nullptr ? right : left;
+    }
+    if (left->priority_ > right->priority_) {
+      left->right_ = Merge(left->right_, right);
+      return left;
+    } else {
+      right->left_ = Merge(left, right->left_);
+      return right;
+    }
   }
-}
 
-// Удаление всего дерева
-void DeleteTree(Node* root) {
-  if (root->left) DeleteTree(root->left);
-  if (root->right) DeleteTree(root->right);
-  delete root;
-}
+// Вставка ключа для декартового дерева
+  friend void InsertForCartesian(Tree<T>*& root, const int& value, const int& priority) {
+    Tree<T>* left;
+    Tree<T>* right;
+
+    Split(root, value, left, right);
+
+    Tree<T>* node = new Tree(value);
+    node->priority_ = priority;
+
+    root = Merge(Merge(left, node), right);
+  }
+
+  // Вставка ключа для бинарного дерева
+  friend void InsertForBinary(Tree<T>* root, const int& value) {
+    if (root == nullptr) {
+      root = new Tree<T>(value);
+      return;
+    }
+    Tree<T> *parent = root, *current = root;
+
+    while (current) {
+      parent = current;
+      current = (value <= current->data_) ? current->left_ : current->right_;
+    }
+
+    if (value <= parent->data_) {
+      parent->left_ = new Tree<T>(value);
+    } else {
+      parent->right_ = new Tree<T>(value);
+    }
+  }
+
+  // Удаление всего дерева
+  friend void DeleteTree(Tree* root) {
+    std::stack<Tree<T>*> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Tree* temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left_) nodes.push(temp->left_);
+      if (temp->right_) nodes.push(temp->right_);
+      delete temp;
+    }
+  }
+};
 
 int main() {
   int n;
@@ -126,8 +138,8 @@ int main() {
   int priority;
   std::cin >> key >> priority;
 
-  Node* cartesian_tree = new Node(key, priority);
-  Node* binary_tree = new Node(key);
+  auto cartesian_tree = new Tree<int>(key, priority);
+  auto binary_tree = new Tree<int>(key);
 
   for (int i = 0; i < n - 1; i++) {
     std::cin >> key >> priority;
