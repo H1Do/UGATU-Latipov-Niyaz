@@ -14,7 +14,7 @@ class BinaryTree {
   explicit BinaryTree(const int &data) : data(data), left(nullptr), right(nullptr) {}
 
   // Нерекурсивный прямой обход дерева с выводом в консоль
-  friend void PreOrder(BinaryTree<T> *root) {
+  friend void PreOrder(BinaryTree<T>* root) {
     std::stack<BinaryTree<T>*> nodes;
     BinaryTree<T> *current = root;
     nodes.push(current);
@@ -33,22 +33,22 @@ class BinaryTree {
   }
 
   // Вставка ключа в дерево
-  friend void Insert(BinaryTree<T> *root, const int& value) {
+  friend void Insert(BinaryTree<T>* root, const int& value) {
+    if (root == nullptr) {
+      root = new BinaryTree<T>(value);
+      return;
+    }
     BinaryTree<T> *parent = root, *current = root;
 
-    while (current != nullptr) {
+    while (current) {
       parent = current;
       current = (value <= current->data) ? current->left : current->right;
     }
-
-    current = new BinaryTree<T>(value);
-
-    if (root == nullptr) {
-      root = new BinaryTree<T>(value);
-    } else if (value < parent->data) {
-      parent->left = current;
+    
+    if (value <= parent->data) {
+      parent->left = new BinaryTree<T>(value);
     } else {
-      parent->right = current;
+      parent->right = new BinaryTree<T>(value);
     }
   }
 
@@ -84,7 +84,7 @@ int main() {
 
   PreOrder(root);
   DeleteTree(root);
-  
+
   std::cout << std::endl;
   return 0;
 }
