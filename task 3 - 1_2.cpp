@@ -1,22 +1,45 @@
-// 63064765 Сейчас контест закрыт, проверить не могу, однако с тестовыми всё работает прекрасно
+// 63064765
 // https://contest.yandex.ru/contest/32613/problems/1_2
 #include <iostream>
 #include <stack>
 
+// Узел бинарного дерева
+template <typename T>
+struct Node {
+  T data;
+  Node *left, *right;
+  explicit Node(const T& data) : data(data), left(nullptr), right(nullptr) {}
+};
+
+// Бинарное дерево
 template <typename T>
 class BinaryTree {
  private:
-  T data;
-  BinaryTree *left, *right;
+  Node<T>* root;
 
+  // Деструктор
+  ~BinaryTree() {
+    std::stack<Node<T>*> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Node<T>* temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left) nodes.push(temp->left);
+      if (temp->right) nodes.push(temp->right);
+      delete temp;
+    }
+  }
  public:
+
   // Конструктор
-  explicit BinaryTree(const int &data) : data(data), left(nullptr), right(nullptr) {}
+  explicit BinaryTree(const T& data) : root(new Node<T>(data)) {}
 
   // Нерекурсивный прямой обход дерева с выводом в консоль
-  friend void PreOrder(BinaryTree<T>* root) {
-    std::stack<BinaryTree<T>*> nodes;
-    BinaryTree<T> *current = root;
+  void PreOrder() {
+    std::stack<Node<T>*> nodes;
+    Node<T> *current = root;
     nodes.push(current);
 
     while (!nodes.empty()) {
@@ -30,42 +53,23 @@ class BinaryTree {
       if (current->left != nullptr)
         nodes.push(current->left);
     }
-  }
+  };
 
   // Вставка ключа в дерево
-  friend void Insert(BinaryTree<T>* root, const int& value) {
+  void Insert(const T& value) {
     if (root == nullptr) {
-      root = new BinaryTree<T>(value);
+      root = new Node<T>(value);
       return;
     }
-    BinaryTree<T> *parent = root, *current = root;
+    Node<T> *parent = root, *current = root;
 
     while (current) {
       parent = current;
       current = (value <= current->data) ? current->left : current->right;
     }
-    
-    if (value <= parent->data) {
-      parent->left = new BinaryTree<T>(value);
-    } else {
-      parent->right = new BinaryTree<T>(value);
-    }
-  }
 
-  // Удаление всего дерева (Вопрос, если написать деструктор, можно же будет избавиться
-  // от необходимости вызывать функцию, для освобождения памяти?)
-  friend void DeleteTree(BinaryTree<T>* root) {
-    std::stack<BinaryTree<T>*> nodes;
-    nodes.push(root);
-
-    while (!nodes.empty()) {
-      BinaryTree<T>* temp = nodes.top();
-      nodes.pop();
-
-      if (temp->left) nodes.push(temp->left);
-      if (temp->right) nodes.push(temp->right);
-      delete temp;
-    }
+    (value <= parent->data) ? parent->left = new Node<T>(value)
+                            : parent->right = new Node<T>(value);
   }
 };
 
@@ -79,11 +83,10 @@ int main() {
 
   for (int i = 0; i < n - 1; i++) {
     std::cin >> in;
-    Insert(root, in);
+    root->Insert(in);
   }
 
-  PreOrder(root);
-  DeleteTree(root);
+  root->PreOrder();
 
   std::cout << std::endl;
   return 0;
