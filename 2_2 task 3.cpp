@@ -14,7 +14,7 @@ struct Node {
   explicit Node(const T& data, const int& priority) : data_(data), priority_(priority),
                                                       left_(nullptr), right_(nullptr) {}
   // Конструктор бинарного узла
-  explicit Node(const T& data) : data_(data), left_(nullptr), right_(nullptr) {}
+  explicit Node(const T& data) : data_(data), left_(nullptr), right_(nullptr), priority_(NULL) {}
 };
 
 // Декартовое дерево
