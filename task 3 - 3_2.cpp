@@ -3,41 +3,66 @@
 #include <iostream>
 #include <stack>
 
+// Узел авл дерева
+template <typename T>
+struct Node {
+  T data_;
+  int height_;
+  int count_;
+  Node *left_, *right_;
+
+  explicit Node(const T& data) : data_(data), height_(1), count_(1), left_(nullptr), right_(nullptr) { }
+};
+
 // Класс авл дерева
 template <typename T>
 class AVLTree {
  private:
-  T data_;
-  int height_;
-  int count_;
-  AVLTree* left_, *right_;
+  Node<T>* root;
 
  public:
-  explicit AVLTree(T data) : data_(data), height_(1), count_(1), left_(nullptr), right_(nullptr) { }
+  // Конструктор
+  explicit AVLTree(const T& data) : root( new Node<T>(data) ) { }
+
+  // Деструктор
+  ~AVLTree() {
+    std::stack<Node<T>*> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Node<T>* temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left_) nodes.push(temp->left_);
+      if (temp->right_) nodes.push(temp->right_);
+      delete temp;
+    }
+  }
+
+  AVLTree(const AVLTree& other) = delete;
+  AVLTree& operator=(const AVLTree& other) = delete;
+  AVLTree(AVLTree && other) = delete;
+  AVLTree& operator=(AVLTree&& other) = delete;
 
   // Функция вывода высоты дерева
-  friend int Height(AVLTree* node) {
-    return (node) ? node->height_ : 0;
+  int Height(Node<T>* node) {
+    return node ? node->height_ : 0;
   }
 
   // Функция вывода количества узлов
-  friend int Count(AVLTree* node) {
-    return (node) ? node->count_ : 0;
+  int Count(Node<T>* node) {
+    return node ? node->count_ : 0;
   }
 
   // Функция "ремонта" высот узлов дерева
-  friend void FixNode(AVLTree* root) {
-    if (Height(root->left_) > Height(root->right_)) {
-      root->height_ = Height(root->left_) + 1;
-    } else {
-      root->height_ = Height(root->right_) + 1;
-    }
-    root->count_ = Count(root->left_) + Count(root->right_) + 1;
+  void FixNode(Node<T>* node) {
+    node->height_ = std::max(Height(node->left_), Height(node->right_));
+    node->count_ = Count(node->left_) + Count(node->right_) + 1;
   }
 
   // Правый поворот
-  friend AVLTree* RotateRight(AVLTree* node) {
-    AVLTree* temp = node->left_;
+  Node<T>* RotateRight(Node<T>* node) {
+    Node<T>* temp = node->left_;
     node->left_ = temp->right_;
     temp->right_ = node;
     FixNode(node);
@@ -46,8 +71,8 @@ class AVLTree {
   }
 
   // Левый поворот
-  friend AVLTree* RotateLeft(AVLTree* node) {
-    AVLTree* temp = node->right_;
+  Node<T>* RotateLeft(Node<T>* node) {
+    Node<T>* temp = node->right_;
     node->right_ = temp->left_;
     temp->left_ = node;
     FixNode(node);
@@ -56,104 +81,105 @@ class AVLTree {
   }
 
   // Функция выводящая разность высот дерева - сбалансированность дерева
-  friend int BalanceFactor(AVLTree* root) {
-    return Height(root->right_) - Height(root->left_);
+  int BalanceFactor(Node<T>* node) {
+    return Height(node->right_) - Height(node->left_);
   }
 
   // Балансировка дерева
-  friend AVLTree* Balance(AVLTree* root) {
-    FixNode(root);
-    if (BalanceFactor(root) == 2) {
-      if (BalanceFactor(root->right_) < 0)
-        root->right_ = RotateRight(root->right_);
-      return RotateLeft(root);
-    } else if (BalanceFactor(root) == -2) {
-      if (BalanceFactor(root->left_) > 0)
-        root->left_ = RotateLeft(root->left_);
-      return RotateRight(root);
+  Node<T>* Balance(Node<T>* node) {
+    FixNode(node);
+    if (BalanceFactor(node) == 2) {
+      if (BalanceFactor(node->right_) < 0)
+        node->right_ = RotateRight(node->right_);
+      return RotateLeft(node);
+    } else if (BalanceFactor(node) == -2) {
+      if (BalanceFactor(node->left_) > 0)
+        node->left_ = RotateLeft(node->left_);
+      return RotateRight(node);
     }
-    return root;
+    return node;
   }
 
   // Поиск узла с минимальным ключем
-  friend AVLTree* FindMin(AVLTree* root) {
-    if (root == nullptr)
+  Node<T>* FindMin(Node<T>* node) {
+    if (node == nullptr)
       return 0;
-    while (root->left_ != nullptr)
-      root = root->left_;
-    return root;
+    while (node->left_ != nullptr)
+      node = node->left_;
+    return node;
   }
 
   // Отделение узла
-  friend AVLTree* Divide(AVLTree* root) {
-    if (root->left_ == nullptr) {
-      return root->right_;
+  Node<T>* Divide(Node<T>* node) {
+    if (node->left_ == nullptr) {
+      return node->right_;
     } else {
-      root->left_ = Divide(root->left_);
+      node->left_ = Divide(node->left_);
     }
-    return Balance(root);
+    return Balance(node);
   }
 
-  // Вставка нового узла
-  friend AVLTree* Insert(AVLTree* root, const int& value) {
-    if (root == nullptr)
-      return new AVLTree(value);
+  // Вставка нового узла (вспомогательная функция)
+  Node<T>* InsertFunction(Node<T>* node, const T& value) {
+    if (node == nullptr)
+      return new Node<T>(value);
 
-    if (value < root->data_) {
-      root->left_ = Insert(root->left_, value);
+    if (value < node->data_) {
+      node->left_ = InsertFunction(node->left_, value);
     } else {
-      root->right_ = Insert(root->right_, value);
+      node->right_ = InsertFunction(node->right_, value);
     }
-    return Balance(root);
+
+    return Balance(node);
   }
 
-  // Удаление узла
-  friend AVLTree* Delete(AVLTree* root, const int& value) {
-    if (root == nullptr)
-      return root;
+  // Метод вставки элемента
+  void Insert(const T& value) {
+    root = InsertFunction(root, value);
+  }
 
-    if (value < root->data_) {
-      root->left_ = Delete(root->left_, value);
-    } else if (value > root->data_) {
-      root->right_ = Delete(root->right_, value);
+  // Удаление узла (вспомогательная функция)
+  Node<T>* DeleteFunction(Node<T>* node, const T& value) {
+    if (node == nullptr)
+      return node;
+
+    if (value < node->data_) {
+      node->left_ = DeleteFunction(node->left_, value);
+    } else if (value > node->data_) {
+      node->right_ = DeleteFunction(node->right_, value);
     } else {
-      if (root->left_ == nullptr || root->right_ == nullptr) {
-        AVLTree* temp = (root->left_) ? root->left_ : root->right_;
-        delete root;
+      if (node->left_ == nullptr || node->right_ == nullptr) {
+        Node<T>* temp = (node->left_) ? node->left_ : node->right_;
+        delete node;
         return temp;
       }
-      AVLTree* min = FindMin(root->right_);
-      min->right_ = Divide(root->right_);
-      min->left_ = root->left_;
-      root = min;
+      Node<T>* min = FindMin(node->right_);
+      min->right_ = Divide(node->right_);
+      min->left_ = node->left_;
+      node = min;
     }
-    return Balance(root);
+    return Balance(node);
   }
 
-  // Поиск k-той порядковой статистики
-  friend int KStatLinear(AVLTree* root, const int& k) {
-    if (Count(root->left_) == k) {
-      return root->data_;
-    } else if (Count(root->left_) > k) {
-      return KStatLinear(root->left_, k);
+  // Метод удаления элемента
+  void Delete(const T& value) {
+    root = DeleteFunction(root, value);
+  }
+
+  // Рекурсивная функция поиска k-той порядковой статистики (вспомогательная функция)
+  T KStatLinearFunction(Node<T>* node, const T& k) {
+    if (Count(node->left_) == k) {
+      return node->data_;
+    } else if (Count(node->left_) > k) {
+      return KStatLinearFunction(node->left_, k);
     } else {
-      return KStatLinear(root->right_, k - Count(root->left_) - 1);
+      return KStatLinearFunction(node->right_, k - Count(node->left_) - 1);
     }
   }
 
-  // Удаление всего дерева
-  friend void DeleteTree(AVLTree* root) {
-    std::stack<AVLTree<T>*> nodes;
-    nodes.push(root);
-
-    while (!nodes.empty()) {
-      AVLTree* temp = nodes.top();
-      nodes.pop();
-
-      if (temp->left_) nodes.push(temp->left_);
-      if (temp->right_) nodes.push(temp->right_);
-      delete temp;
-    }
+  // Метод поиска k-той порядковой статистики
+  T KStatLinear(const T& k) {
+    return KStatLinearFunction(root, k);
   }
 };
 
@@ -161,21 +187,22 @@ int main() {
   int n, in, k;
   std::cin >> n >> in >> k;
 
-  auto* avl_tree = new AVLTree<int>(in);
-  std::cout << KStatLinear(avl_tree, k) << ' ';
+  AVLTree<int> avl_tree = AVLTree<int>(in);
+
+  std::cout << avl_tree.KStatLinear(k) << ' ';
 
   for (int i = 0; i < n - 1; i++) {
     std::cin >> in >> k;
 
     if (in >= 0) {
-      avl_tree = Insert(avl_tree, in);
+      avl_tree.Insert(in);
     } else {
-      avl_tree = Delete(avl_tree, -in);
+      avl_tree.Delete(-in);
     }
-    std::cout << KStatLinear(avl_tree, k) << ' ';
+    std::cout << avl_tree.KStatLinear(k) << ' ';
   }
 
-  DeleteTree(avl_tree);
   std::cout << std::endl;
+
   return 0;
 }
