@@ -17,6 +17,10 @@ class BinaryTree {
  private:
   Node<T>* root;
 
+ public:
+  // Конструктор
+  explicit BinaryTree(const T& data) : root(new Node<T>(data)) {}
+
   // Деструктор
   ~BinaryTree() {
     std::stack<Node<T>*> nodes;
@@ -31,10 +35,11 @@ class BinaryTree {
       delete temp;
     }
   }
- public:
 
-  // Конструктор
-  explicit BinaryTree(const T& data) : root(new Node<T>(data)) {}
+  BinaryTree(const BinaryTree& other) = delete;
+  BinaryTree& operator=(const BinaryTree& other) = delete;
+  BinaryTree(BinaryTree && other) = delete;
+  BinaryTree& operator=(BinaryTree&& other) = delete;
 
   // Нерекурсивный прямой обход дерева с выводом в консоль
   void PreOrder() {
@@ -68,8 +73,7 @@ class BinaryTree {
       current = (value <= current->data) ? current->left : current->right;
     }
 
-    (value <= parent->data) ? parent->left = new Node<T>(value)
-                            : parent->right = new Node<T>(value);
+    (value <= parent->data) ? parent->left : parent->right = new Node<T>(value);
   }
 };
 
@@ -79,14 +83,14 @@ int main() {
 
   int in;
   std::cin >> in;
-  auto* root = new BinaryTree<int>(in);
+  BinaryTree<int> tree = BinaryTree<int>(in);
 
   for (int i = 0; i < n - 1; i++) {
     std::cin >> in;
-    root->Insert(in);
+    tree.Insert(in);
   }
 
-  root->PreOrder();
+  tree.PreOrder();
 
   std::cout << std::endl;
   return 0;
