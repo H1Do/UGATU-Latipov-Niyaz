@@ -20,30 +20,6 @@ class AVLTree {
  private:
   Node<T>* root;
 
- public:
-  // Конструктор
-  explicit AVLTree(const T& data) : root( new Node<T>(data) ) { }
-
-  // Деструктор
-  ~AVLTree() {
-    std::stack<Node<T>*> nodes;
-    nodes.push(root);
-
-    while (!nodes.empty()) {
-      Node<T>* temp = nodes.top();
-      nodes.pop();
-
-      if (temp->left_) nodes.push(temp->left_);
-      if (temp->right_) nodes.push(temp->right_);
-      delete temp;
-    }
-  }
-
-  AVLTree(const AVLTree& other) = delete;
-  AVLTree& operator=(const AVLTree& other) = delete;
-  AVLTree(AVLTree && other) = delete;
-  AVLTree& operator=(AVLTree&& other) = delete;
-
   // Функция вывода высоты дерева
   int Height(Node<T>* node) {
     return node ? node->height_ : 0;
@@ -133,11 +109,6 @@ class AVLTree {
     return Balance(node);
   }
 
-  // Метод вставки элемента
-  void Insert(const T& value) {
-    root = InsertFunction(root, value);
-  }
-
   // Удаление узла (вспомогательная функция)
   Node<T>* DeleteFunction(Node<T>* node, const T& value) {
     if (node == nullptr)
@@ -161,11 +132,6 @@ class AVLTree {
     return Balance(node);
   }
 
-  // Метод удаления элемента
-  void Delete(const T& value) {
-    root = DeleteFunction(root, value);
-  }
-
   // Рекурсивная функция поиска k-той порядковой статистики (вспомогательная функция)
   T KStatLinearFunction(Node<T>* node, const T& k) {
     if (Count(node->left_) == k) {
@@ -175,6 +141,40 @@ class AVLTree {
     } else {
       return KStatLinearFunction(node->right_, k - Count(node->left_) - 1);
     }
+  }
+
+ public:
+  // Конструктор
+  explicit AVLTree(const T& data) : root( new Node<T>(data) ) { }
+
+  // Деструктор
+  ~AVLTree() {
+    std::stack<Node<T>*> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Node<T>* temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left_) nodes.push(temp->left_);
+      if (temp->right_) nodes.push(temp->right_);
+      delete temp;
+    }
+  }
+
+  AVLTree(const AVLTree& other) = delete;
+  AVLTree& operator=(const AVLTree& other) = delete;
+  AVLTree(AVLTree && other) = delete;
+  AVLTree& operator=(AVLTree&& other) = delete;
+
+  // Метод вставки элемента
+  void Insert(const T& value) {
+    root = InsertFunction(root, value);
+  }
+
+  // Метод удаления элемента
+  void Delete(const T& value) {
+    root = DeleteFunction(root, value);
   }
 
   // Метод поиска k-той порядковой статистики
