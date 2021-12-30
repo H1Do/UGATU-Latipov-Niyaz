@@ -4,35 +4,63 @@
 #include <vector>
 #include <stack>
 
-// Класс дерева, как бинарного, так и декартового
+// Гибридный узел дерева, как для бинарного, так и для декартового
 template <typename T>
-class Tree {
- private:
+struct Node {
   T data_;
   int priority_;
-  Tree *left_, *right_;
+  Node *left_, *right_;
+  // Конструктор декартового узла
+  explicit Node(const T& data, const int& priority) : data_(data), priority_(priority),
+                                                      left_(nullptr), right_(nullptr) {}
+  // Конструктор бинарного узла
+  explicit Node(const T& data) : data_(data), left_(nullptr), right_(nullptr) {}
+};
+
+// Декартовое дерево
+template <typename T>
+class CartesianTree {
+ private:
+  Node<T>* root;
 
  public:
-  // Конструктор бинарного узла дерева
-  Tree(const T& data) : data_(data), left_(nullptr), right_(nullptr) { }
 
-  // Конструктор декартового узла дерева
-  Tree(const T& data, const int& priority) : data_(data), priority_(priority), left_(nullptr),
-                                  right_(nullptr) { }
+  // Конструктор
+  CartesianTree(const T& data, const int& priority) : root(new Node(data, priority)) { }
 
-  // Высота дерева
-  friend int Height(Tree<T>* node) {
+  // Деструктор
+  ~CartesianTree() {
+    std::stack<Node<T>*> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Node<T>* temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left_) nodes.push(temp->left_);
+      if (temp->right_) nodes.push(temp->right_);
+      delete temp;
+    }
+  }
+
+  CartesianTree(const CartesianTree& other) = delete;
+  CartesianTree& operator=(const CartesianTree& other) = delete;
+  CartesianTree(CartesianTree && other) = delete;
+  CartesianTree& operator=(CartesianTree&& other) = delete;
+
+  // Высота дерева, ф-ия рекурсивная, как метод сделать не могу
+  int Height(Node<T>* node) {
     if (node == nullptr)
       return 0;
 
     int left = Height(node->left_);
     int right = Height(node->right_);
 
-    return ((left > right) ? left : right) + 1;
+    return std::max(left, right) + 1;
   }
 
-  // Обход дерева в глубину с подсчётом кол-ва узлов разных высот
-  friend void DFS(Tree<T>* node, int node_height, std::vector<int>& heights) {
+  // Обход в ширину с подсчётом кол-ва узлов на разных уровнях, тоже рекурсивная
+  void DFS(Node<T>* node, int node_height, std::vector<int>& heights) {
     if (node == nullptr)
       return;
     ++heights[node_height];
@@ -40,35 +68,33 @@ class Tree {
     DFS(node->right_, node_height + 1, heights);
   }
 
-  // Ширина деревьев
-  friend int Width(Tree<T>* node) {
-    int height = Height(node);
-    std::vector<int>heights(height);
-    DFS(node, 0, heights);
+  // Ширина дерева
+  int Width() {
+    int height = Height(root);
+    std::vector<int> heights(height);
+    DFS(root, 0, heights);
 
     int max = 0;
-    for (int i = 0; i < height; i++) {
-      max = (heights[i] > max) ? heights[i] : max;
-    }
+    for (int i = 0; i < height; i++)
+      if (heights[i] > max) max = heights[i];
+
     return max;
   }
 
-  // Функция разделения для декартового дерева
-  friend void Split(Tree<T>* current_node, const int& key, Tree<T>*& left, Tree<T>*& right) {
-    if (current_node == nullptr) {
+  void Split(Node<T>* node, const T& key, Node<T>*& left, Node<T>*& right) {
+    if (node == nullptr) {
       left = nullptr;
       right = nullptr;
-    } else if (current_node->data_ < key) {
-      Split(current_node->right_, key, current_node->right_, right);
-      left = current_node;
+    } else if (node->data_ < key) {
+      Split(node->right_, key, node->right_, right);
+      left = node;
     } else {
-      Split(current_node->left_, key, left, current_node->left_);
-      right = current_node;
+      Split(node->left_, key, left, node->left_);
+      right = node;
     }
   }
 
-  // Функция слияния для декартового дерева
-  friend Tree<T>* Merge(Tree<T>* left, Tree<T>* right) {
+  Node<T>* Merge(Node<T>* left, Node<T>* right) {
     if (left == nullptr || right == nullptr) {
       return left == nullptr ? right : left;
     }
@@ -81,26 +107,90 @@ class Tree {
     }
   }
 
-// Вставка ключа для декартового дерева
-  friend void InsertForCartesian(Tree<T>*& root, const int& value, const int& priority) {
-    Tree<T>* left;
-    Tree<T>* right;
+  // Вставка
+  void Insert(const T& value, const int& priority) {
+    Node<T>* left;
+    Node<T>* right;
 
     Split(root, value, left, right);
 
-    Tree<T>* node = new Tree(value);
+    Node<T>* node = new Node(value);
     node->priority_ = priority;
 
     root = Merge(Merge(left, node), right);
   }
+};
+
+// Бинарное дерево
+template <typename T>
+class BinaryTree {
+ private:
+  Node<T> *root;
+
+ public:
+  // Конструктор
+  BinaryTree(const T &data) : root(new Node(data)) {}
+
+  // Деструктор
+  ~BinaryTree() {
+    std::stack<Node<T> *> nodes;
+    nodes.push(root);
+
+    while (!nodes.empty()) {
+      Node<T> *temp = nodes.top();
+      nodes.pop();
+
+      if (temp->left_) nodes.push(temp->left_);
+      if (temp->right_) nodes.push(temp->right_);
+      delete temp;
+    }
+  }
+
+  BinaryTree(const BinaryTree& other) = delete;
+  BinaryTree& operator=(const BinaryTree& other) = delete;
+  BinaryTree(BinaryTree && other) = delete;
+  BinaryTree& operator=(BinaryTree&& other) = delete;
+
+  // Высота дерева, ф-ия рекурсивная, как метод сделать не могу
+  int Height(Node<T>* node) {
+    if (node == nullptr)
+      return 0;
+
+    int left = Height(node->left_);
+    int right = Height(node->right_);
+
+    return std::max(left, right) + 1;
+  }
+
+  // Обход в ширину с подсчётом кол-ва узлов на разных уровнях, тоже рекурсивная
+  void DFS(Node<T>* node, int node_height, std::vector<int>& heights) {
+    if (node == nullptr)
+      return;
+    ++heights[node_height];
+    DFS(node->left_, node_height + 1, heights);
+    DFS(node->right_, node_height + 1, heights);
+  }
+
+  // Ширина дерева
+  int Width() {
+    int height = Height(root);
+    std::vector<int> heights(height);
+    DFS(root, 0, heights);
+
+    int max = 0;
+    for (int i = 0; i < height; i++)
+      if (heights[i] > max) max = heights[i];
+
+    return max;
+  }
 
   // Вставка ключа для бинарного дерева
-  friend void InsertForBinary(Tree<T>* root, const int& value) {
+  void Insert(const T& value) {
     if (root == nullptr) {
-      root = new Tree<T>(value);
+      root = new Node<T>(value);
       return;
     }
-    Tree<T> *parent = root, *current = root;
+    Node<T> *parent = root, *current = root;
 
     while (current) {
       parent = current;
@@ -108,24 +198,9 @@ class Tree {
     }
 
     if (value <= parent->data_) {
-      parent->left_ = new Tree<T>(value);
+      parent->left_ = new Node<T>(value);
     } else {
-      parent->right_ = new Tree<T>(value);
-    }
-  }
-
-  // Удаление всего дерева
-  friend void DeleteTree(Tree* root) {
-    std::stack<Tree<T>*> nodes;
-    nodes.push(root);
-
-    while (!nodes.empty()) {
-      Tree* temp = nodes.top();
-      nodes.pop();
-
-      if (temp->left_) nodes.push(temp->left_);
-      if (temp->right_) nodes.push(temp->right_);
-      delete temp;
+      parent->right_ = new Node<T>(value);
     }
   }
 };
@@ -138,17 +213,15 @@ int main() {
   int priority;
   std::cin >> key >> priority;
 
-  auto cartesian_tree = new Tree<int>(key, priority);
-  auto binary_tree = new Tree<int>(key);
+  auto cartesian_tree = CartesianTree<int>(key, priority);
+  auto binary_tree = BinaryTree<int>(key);
 
   for (int i = 0; i < n - 1; i++) {
     std::cin >> key >> priority;
-    InsertForCartesian(cartesian_tree, key, priority);
-    InsertForBinary(binary_tree, key);
+    cartesian_tree.Insert(key, priority);
+    binary_tree.Insert(key);
   }
 
-  std::cout << Width(cartesian_tree) - Width(binary_tree) << std::endl;
-  DeleteTree(cartesian_tree);
-  DeleteTree(binary_tree);
+  std::cout << cartesian_tree.Width() - binary_tree.Width() << std::endl;
   return 0;
 }
