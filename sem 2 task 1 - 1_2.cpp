@@ -1,7 +1,8 @@
-// https://contest.yandex.ru/contest/35212
-// 65676249 (TL)
-// Используя квадратичное пробирование (не мой вариант) доходит до 7 теста по времени, с моим вариантом TL уже на 3
-// Не могу понять, что сделано не так, буду благодарен если Вы что-нибудь посоветуете.
+// Положение существенно улучшилось, однако теперь просто валиться на 7 тесте. Пытался поиграться с коэффициентами,
+// соблюдая (h1 + i * h2) % M где M (размер таблицы) степень двойки, а h2 всегда нечетная, однако
+// никакого прогресса не вижу.
+// https://contest.yandex.ru/contest/35212/problems/1/?success=65721542#194179/2016_11_21/YiZ2Xj7kse
+// 65721512
 #include <iostream>
 #include <utility>
 
@@ -9,15 +10,15 @@
 unsigned int Hash1(const std::string& input_string, unsigned int max) {
   unsigned int hash = 0;
   for (auto symbol : input_string)
-    hash = (hash * (max - 1) + symbol) % max;
+    hash = (hash * 7 + symbol) % max;
   return hash;
 }
 
 // Вторая хеш функция (возвращает исключительно нечетные числа)
 unsigned int Hash2(const std::string& input_string, unsigned int max) {
-  unsigned int hash = 0;
+  unsigned int hash = 1;
   for (auto symbol : input_string)
-    hash = (hash * (max + 1) + symbol) % max;
+    hash = (hash * 3 + symbol) % max;
   return (hash * 2 + 1) % max;
 }
 
@@ -79,7 +80,7 @@ class HashTable {
 
   // Функция ввода данных
   bool Insert(const std::string& value) {
-    if ((static_cast<double>(buffer_occupancy) / static_cast<double>(buffer_size)) > (3.0 / 4.0))
+    if ((static_cast<double>(buffer_occupancy) / static_cast<double>(buffer_size)) >= (3.0 / 4.0))
       Rebuild();
 
     unsigned int hash1 = Hash1(value, buffer_size);
@@ -146,6 +147,12 @@ class HashTable {
     }
     return false;
   }
+
+  void PrintAllElements() {
+    for (unsigned int i = 0; i < buffer_size; i++)
+      std::cout << i << ' ' << (buffer[i] ? buffer[i]->value : "-1") << std::endl;
+    std::cout << static_cast<double>(buffer_occupancy) / static_cast<double>(buffer_size);
+  }
 };
 
 int main() {
@@ -159,5 +166,6 @@ int main() {
       std::cout << (hash_table.Delete(value) ? "OK" : "FAIL") << std::endl;
     else if (sign == "?")
       std::cout << (hash_table.Find(value) ? "OK" : "FAIL") << std::endl;
+    // hash_table.PrintAllElements();
   }
 }
