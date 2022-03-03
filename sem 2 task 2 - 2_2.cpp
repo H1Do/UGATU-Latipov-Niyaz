@@ -15,10 +15,10 @@ struct Application {
 };
 
 template <typename T>
-void SiftDown(std::vector<T>& arr, int size, int i) {
-  int left = 2 * i + 1;
-  int right = 2 * i + 2;
-  int largest = i;
+void SiftDown(std::vector<T>& arr, size_t size, size_t i) {
+  size_t left = 2 * i + 1;
+  size_t right = 2 * i + 2;
+  size_t largest = i;
   if (left < size && arr[i] < arr[left]) largest = left;
   if (right < size && arr[largest] < arr[right]) largest = right;
   if (largest != i) {
@@ -29,9 +29,9 @@ void SiftDown(std::vector<T>& arr, int size, int i) {
 
 // Пирамидальная сортировка
 template <typename T>
-void HeapSort(std::vector<T>& arr, int size) {
-  for (int i = size / 2 - 1; i >= 0; i--) SiftDown(arr, size, i);
-  for (int i = size - 1; i >= 0; i--) {
+void HeapSort(std::vector<T>& arr, size_t size) {
+  for (size_t i = size / 2 - 1; i >= 0; i--) SiftDown(arr, size, i);
+  for (size_t i = size - 1; i >= 0; i--) {
     std::swap(arr[0], arr[i]);
     SiftDown(arr, i, 0);
   }
@@ -39,10 +39,10 @@ void HeapSort(std::vector<T>& arr, int size) {
 
 // Подсчёт максимального кол-ва заявок, которые можно принять
 int MaxApplications(const std::vector<Application>& Applications) {
-  int result = 1;
+  size_t result = 1;
   auto prev = Applications[0];
 
-  for (int i = 1; i < Applications.size(); i++) {
+  for (size_t i = 1; i < Applications.size(); i++) {
     if (prev.ending <= Applications[i].beginning) {
       prev = Applications[i];
       result++;
@@ -59,9 +59,9 @@ int main() {
   while (std::cin >> beginning >> ending)
     applications.emplace_back(beginning, ending);
 
-  HeapSort(applications, static_cast<int>(applications.size()));
+  HeapSort(applications, applications.size());
 
-  std::cout << MaxApplications(applications);
+  std::cout << MaxApplications(applications) << std::endl;
 
   return 0;
 }
