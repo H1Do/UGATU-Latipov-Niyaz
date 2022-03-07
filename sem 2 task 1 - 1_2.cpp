@@ -58,9 +58,7 @@ class HashTable {
 
  public:
   // Конструктор
-  HashTable() : buffer_size(8), buffer_occupancy(0) {
-    buffer = new HashNode* [buffer_size] { nullptr };
-  }
+  HashTable() : buffer_size(8), buffer_occupancy(0), buffer(new HashNode* [buffer_size] {nullptr}) { }
 
   // Деструктор
   ~HashTable() {
