@@ -1,35 +1,32 @@
 // https://contest.yandex.ru/contest/35212/problems/1
-// 65778309
+// 65825689
 #include <iostream>
 
-// Первая хеш функция (Методом Горнера)
-unsigned int Hash1(const std::string& input_string, unsigned int max) {
-  unsigned int hash = 0;
-  for (auto symbol : input_string) hash = (hash * 761 + symbol) % max;
-  return hash;
-}
+struct Hash1 {
+  unsigned int operator()(const std::string& input_string, unsigned int max) const {
+    unsigned int hash = 0;
+    for (auto symbol : input_string) hash = (hash * 761 + symbol) % max;
+    return hash;
+  }
+};
 
-// Вторая хеш функция (возвращает исключительно нечетные числа)
-unsigned int Hash2(const std::string& input_string, unsigned int max) {
-  unsigned int hash = 1;
-  for (auto symbol : input_string) hash = (hash * 383 + symbol) % max;
-  return (hash * 2 + 1) % max;
-}
-
-// Функция двойного хеширования
-unsigned int Hash(unsigned int hash1, unsigned int hash2, unsigned int i,
-                  unsigned int max) {
-  return (hash1 + i * hash2) % max;
-}
+struct Hash2 {
+  unsigned int operator()(const std::string& input_string, unsigned int max) const {
+    unsigned int hash = 1;
+    for (auto symbol : input_string) hash = (hash * 383 + symbol) % max;
+    return (hash * 2 + 1) % max;
+  }
+};
 
 // ХешТаблица
+template <typename T, typename THash1 = Hash1, typename THash2 = Hash2>
 class HashTable {
  private:
   struct HashNode {
-    std::string value;
-    bool is_it_deleted;
-    explicit HashNode(std::string value_)
-        : value(std::move(value_)), is_it_deleted(false) {}
+    T value;
+    bool is_deleted;
+    explicit HashNode(const T& value_)
+        : value(std::move(value_)), is_deleted(false) {}
   };
 
   unsigned int buffer_size;
@@ -47,19 +44,21 @@ class HashTable {
     std::swap(buffer, temp_buffer);
 
     for (int i = 0; i < buffer_size / 2; i++) {
-      if (temp_buffer[i] && !temp_buffer[i]->is_it_deleted)
+      if (temp_buffer[i] && !temp_buffer[i]->is_deleted)
         Insert(temp_buffer[i]->value);
       delete temp_buffer[i];
     }
     delete[] temp_buffer;
   }
 
+  // Функция двойного хеширования
+  unsigned int Hash(unsigned int hash1_result, unsigned int hash2_result, unsigned int i) {
+    return (hash1_result + i * hash2_result) % buffer_size;
+  }
+
  public:
   // Конструктор
-  HashTable() {
-    buffer_size = 8;
-    buffer_occupancy = 0;
-
+  HashTable() : buffer_size(8), buffer_occupancy(0) {
     buffer = new HashNode* [buffer_size] { nullptr };
   }
 
@@ -70,69 +69,100 @@ class HashTable {
     delete[] buffer;
   }
 
+  // Конструктор копирования
+  HashTable(const HashTable& other) : buffer_size(other.buffer_size),
+                                      buffer_occupancy(other.buffer_occupancy),
+                                      buffer(other.buffer) { }
+
+  // Конструктор перемещения
+  HashTable(HashTable&& other) noexcept {
+    buffer_size = other.buffer_size;
+    buffer_occupancy = other.buffer_occupancy;
+    buffer = other.buffer;
+    other.buffer_size = 0;
+    other.buffer_occupancy = 0;
+    other.buffer = nullptr;
+  }
+
+  // Оператор копирования
+  HashTable& operator=(const HashTable& other) {
+    *this = HashTable(other);
+    return *this;
+  }
+
+  // Оператор перемещения
+  HashTable& operator=(HashTable&& other) noexcept {
+    std::swap(buffer_size, other.buffer_size);
+    std::swap(buffer_occupancy, buffer_occupancy);
+    std::swap(buffer, buffer);
+    return *this;
+  }
+
   // Функция ввода данных
-  bool Insert(const std::string& value) {
+  bool Insert(const T& value, const THash1& HashF1 = THash1(),
+              const THash2& HashF2 = THash2()) {
+
     if (Find(value)) return false;
-    if ((static_cast<double>(buffer_occupancy) / 
-         static_cast<double>(buffer_size)) >= (3.0 / 4.0))
+    if ((static_cast<double>(buffer_occupancy) /
+        static_cast<double>(buffer_size)) >= (3.0 / 4.0))
       Rebuild();
 
-    unsigned int hash1 = Hash1(value, buffer_size);
-    unsigned int hash2 = Hash2(value, buffer_size);
-    unsigned int hash = Hash(hash1, hash2, 0, buffer_size);
-    unsigned int i = 0;
+    unsigned int hash1 = HashF1(value, buffer_size);
+    unsigned int hash2 = HashF2(value, buffer_size);
+    unsigned int hash = Hash(hash1, hash2, 0);
 
-    while (i < buffer_size) {
-      if (buffer[hash] == nullptr || buffer[hash]->is_it_deleted) {
+    for (unsigned int i = 1; i < buffer_size; i++) {
+      if (buffer[hash] == nullptr || buffer[hash]->is_deleted) {
         buffer[hash] = new HashNode(value);
         buffer_occupancy++;
         return true;
       }
 
-      i++;
-      hash = Hash(hash1, hash2, i, buffer_size);
+      hash = Hash(hash1, hash2, i);
     }
     return false;
   }
 
   // Функция удаления данных
-  bool Delete(const std::string& value) {
-    unsigned int hash1 = Hash1(value, buffer_size);
-    unsigned int hash2 = Hash2(value, buffer_size);
-    unsigned int hash = Hash(hash1, hash2, 0, buffer_size);
-    unsigned int i = 0;
+  bool Delete(const T& value, const THash1& HashF1 = THash1(),
+              const THash2& HashF2 = THash2()) {
 
-    while (buffer[hash] != nullptr) {
-      if (buffer[hash]->value == value && !buffer[hash]->is_it_deleted) {
-        buffer[hash]->is_it_deleted = true;
+    unsigned int hash1 = HashF1(value, buffer_size);
+    unsigned int hash2 = HashF2(value, buffer_size);
+    unsigned int hash = Hash(hash1, hash2, 0);
+
+    for (unsigned int i = 1; buffer[hash] != nullptr; i++) {
+      if (buffer[hash]->value == value && !buffer[hash]->is_deleted) {
+        buffer[hash]->is_deleted = true;
         buffer_occupancy--;
         return true;
       }
-      i++;
-      hash = Hash(hash1, hash2, i, buffer_size);
+      hash = Hash(hash1, hash2, i);
     }
     return false;
   }
 
   // Функция поиска данных
-  bool Find(const std::string& value) const {
-    unsigned int hash1 = Hash1(value, buffer_size);
-    unsigned int hash2 = Hash2(value, buffer_size);
-    unsigned int hash = Hash(hash1, hash2, 0, buffer_size);
+  bool Find(const T& value, const THash1& HashF1 = THash1(),
+            const THash2& HashF2 = THash2()) {
 
-    unsigned int i = 0;
-    while (buffer[hash] != nullptr && i < buffer_size) {
-      if (buffer[hash]->value == value && !buffer[hash]->is_it_deleted)
+    unsigned int hash1 = HashF1(value, buffer_size);
+    unsigned int hash2 = HashF2(value, buffer_size);
+    unsigned int hash = Hash(hash1, hash2, 0);
+
+    for (unsigned int i = 1; buffer[hash] != nullptr && i < buffer_size; i++) {
+      if (buffer[hash]->value == value && !buffer[hash]->is_deleted)
         return true;
-      i++;
-      hash = Hash(hash1, hash2, i, buffer_size);
+
+      hash = Hash(hash1, hash2, i);
     }
     return false;
   }
 };
 
+
 int main() {
-  HashTable hash_table;
+  HashTable<std::string> hash_table;
 
   std::string sign, value;
   while (std::cin >> sign >> value) {
