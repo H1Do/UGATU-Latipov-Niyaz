@@ -75,10 +75,9 @@ class HashTable {
                                       buffer(other.buffer) { }
 
   // Конструктор перемещения
-  HashTable(HashTable&& other) noexcept {
-    buffer_size = other.buffer_size;
-    buffer_occupancy = other.buffer_occupancy;
-    buffer = other.buffer;
+  HashTable(HashTable&& other) noexcept : buffer_size(other.buffer_size), 
+                                          buffer_occupancy(other.buffer_occupancy), 
+                                          buffer(other.buffer) {
     other.buffer_size = 0;
     other.buffer_occupancy = 0;
     other.buffer = nullptr;
