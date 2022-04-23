@@ -1,38 +1,54 @@
 // https://contest.yandex.ru/contest/36361/problems/4
-// 67515239
+// 67707138
 #include <iostream>
 #include <vector>
 #include <set>
 
 class Graph {
  private:
-  std::vector<std::vector<std::pair<int, unsigned long long>>> graph;
+  using AdjacenceList = std::vector<std::vector<std::pair<int, unsigned long long>>>;
+  AdjacenceList graph;
+  int size;
 
  public:
   explicit Graph(int size);
+  int VerticesCount() const;
   void Insert(int from, int to, int weight);
-  unsigned long long Dijkstra(int from, int to);
+  void FindAllAdjacentOut(int vertex, std::vector<std::pair<int, unsigned long long>>& vertices) const;
 };
 
-Graph::Graph(int size) : graph(std::vector<std::vector<std::pair<int, unsigned long long>>>(size, std::vector<std::pair<int, unsigned long long>>())) { }
+Graph::Graph(int size) : graph(AdjacenceList(size, std::vector<std::pair<int, unsigned long long>>())),
+                         size(size) { }
+
+int Graph::VerticesCount() const {
+  return size;
+}
 
 void Graph::Insert(int from, int to, int weight) {
   graph[from].push_back({to, weight});
   graph[to].push_back({from, weight});
 }
 
-unsigned long long Graph::Dijkstra(int from, int to) {
-  std::vector<unsigned long long> distance (graph.size(), __LONG_LONG_MAX__);
+void Graph::FindAllAdjacentOut(int vertex, std::vector<std::pair<int, unsigned long long>>& vertices) const {
+  for (auto i : graph[vertex])
+    vertices.push_back(i);
+}
+
+unsigned long long Dijkstra(int from, int to, const Graph& graph) {
+  std::vector<unsigned long long> distance(graph.VerticesCount(), __LONG_LONG_MAX__);
+  std::set<std::pair<unsigned long long, int>> order;
 
   distance[from] = 0;
-  std::set<std::pair<int, unsigned long long>> order;
   order.insert({0, from});
 
+  std::vector<std::pair<int, unsigned long long>> vertices;
   while (!order.empty()) {
     auto [current_dist, current_vert] = *order.begin();
     order.erase(order.begin());
 
-    for (auto [vertex, weight] : graph[current_vert]) {
+    vertices.clear();
+    graph.FindAllAdjacentOut(current_vert, vertices);
+    for (auto [vertex, weight] : vertices) {
       if (distance[vertex] > current_dist + weight) {
         order.erase({distance[vertex], vertex});
         distance[vertex] = current_dist + weight;
@@ -54,8 +70,8 @@ int main() {
     std::cin >> from >> to >> weight;
     graph.Insert(from, to, weight);
   }
-
   std::cin >> from >> to;
-  std::cout << graph.Dijkstra(from, to) << std::endl;
+
+  std::cout << Dijkstra(from, to, graph) << std::endl;
   return 0;
 }
