@@ -9,7 +9,7 @@
 
 class MatrixGraph : IGraph {
  public:
-  using Matrix = std::vector<std::vector<int>>;
+  using Matrix = std::vector<std::vector<bool>>;
   explicit MatrixGraph(int size);
   explicit MatrixGraph(const IGraph* graph);
   void AddEdge(int from, int to) override;
