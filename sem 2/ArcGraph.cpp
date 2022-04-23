@@ -16,8 +16,7 @@ ArcGraph::ArcGraph(const IGraph *graph) : size(graph->VerticesCount()) {
 }
 
 void ArcGraph::AddEdge(int from, int to) {
-  std::pair<int, int> edge = {from, to};
-  graph.push_back(edge);
+  graph.push_back({from, to});
 }
 
 int ArcGraph::VerticesCount() const {
