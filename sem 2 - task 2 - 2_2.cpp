@@ -33,7 +33,7 @@ void Graph::FindAllAdjacentOut(int vertex, std::vector<std::pair<int, unsigned l
     vertices.push_back(i);
 }
 
-unsigned long long Prim(Graph graph) {
+unsigned long long Prim(const Graph& graph) {
   std::vector<unsigned long long> distance(graph.VerticesCount(), __LONG_LONG_MAX__);
   std::vector<int> viewed(graph.VerticesCount());
   std::set<std::pair<unsigned long long, int>> order;
@@ -64,12 +64,12 @@ unsigned long long Prim(Graph graph) {
 }
 
 int main() {
-  int cities, roads;
-  std::cin >> cities >> roads;
-  Graph graph(cities);
+  int vertices_count, edges_count;
+  std::cin >> vertices_count >> edges_count;
+  Graph graph(vertices_count);
 
   int from, to, weight;
-  for (int i = 0; i < roads; i++) {
+  for (int i = 0; i < edges_count; i++) {
     std::cin >> from >> to >> weight;
     graph.Insert(--from, --to, weight);
   }
