@@ -1,62 +1,72 @@
 // https://contest.yandex.ru/contest/36361/problems/2.2/
-// 67160909	
+// 67822032
 #include <iostream>
 #include <vector>
 #include <queue>
 
 class Graph {
  private:
-  struct GraphNode {
-    int depth;
-    int path;
-    std::vector<int> subsequents;
-    GraphNode() : depth(1e9), path(0) { }
-  };
-  std::vector<GraphNode> graph;
+  using AdjacenceList = std::vector<std::vector<int>>;
+  AdjacenceList graph;
+  int size;
 
  public:
   explicit Graph(int size);
   void Insert(int from, int to);
-  void BFS(int from);
-  int SearchCountMinDistance(int from, int to);
+  int VerticesCount() const;
+  void FindAllAdjacentOut(int vertex, std::vector<int>& vertices);
 };
 
-Graph::Graph(int size) : graph(std::vector<GraphNode>(size, GraphNode())) { }
+Graph::Graph(int size) : graph(size), size(size) { }
 
 void Graph::Insert(int from, int to) {
-  graph[from].subsequents.push_back(to);
-  graph[to].subsequents.push_back(from);
+  graph[from].push_back(to);
+  graph[to].push_back(from);
 }
 
-void Graph::BFS(int from) {
+int Graph::VerticesCount() const {
+  return size;
+}
+
+void Graph::FindAllAdjacentOut(int vertex, std::vector<int> &vertices) {
+  vertices.clear();
+  for (auto i : graph[vertex]) {
+    vertices.push_back(i);
+  }
+}
+
+int SearchCountMinDistance(int from, int to, Graph graph) {
   std::queue<int> order;
-  std::vector<int> visited(graph.size());
+  std::vector<int> visited(graph.VerticesCount());
+  std::vector<int> depth(graph.VerticesCount(), 1e9);
+  std::vector<int> path(graph.VerticesCount());
+
   visited[from] = 1;
-  graph[from].depth = 0;
-  graph[from].path = 1;
+  depth[from] = 0;
+  path[from] = 1;
+
   order.push(from);
 
-  int current;
+  int current; std::vector<int> vertices;
   while (!order.empty()) {
     current = order.front(); order.pop();
-    for (auto subsequent : graph[current].subsequents) {
+
+    graph.FindAllAdjacentOut(current, vertices);
+    for (auto subsequent : vertices) {
       if (!visited[subsequent]) {
         order.push(subsequent);
         visited[subsequent] = 1;
       }
-      if (graph[subsequent].depth > graph[current].depth + 1) {
-        graph[subsequent].depth = graph[current].depth + 1;
-        graph[subsequent].path = graph[current].path;
-      } else if (graph[subsequent].depth == graph[current].depth + 1){
-        graph[subsequent].path += graph[current].path;
+      if (depth[subsequent] > depth[current] + 1) {
+        depth[subsequent] = depth[current] + 1;
+        path[subsequent] = path[current];
+      } else if (depth[subsequent] == depth[current] + 1){
+        path[subsequent] += path[current];
       }
     }
   }
-}
 
-int Graph::SearchCountMinDistance(int from, int to) {
-  BFS(from);
-  return graph[to].path;
+  return path[to];
 }
 
 int main() {
@@ -71,6 +81,6 @@ int main() {
   }
   std::cin >> from >> to;
 
-  std::cout << graph.SearchCountMinDistance(from, to) << std::endl;
+  std::cout << SearchCountMinDistance(from, to, graph) << std::endl;
   return 0;
 }
