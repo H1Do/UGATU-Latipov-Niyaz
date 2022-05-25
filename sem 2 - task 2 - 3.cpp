@@ -2,7 +2,6 @@
 // 68605253
 #include <iostream>
 #include <vector>
-#include <cstring>
 
 class Graph {
  public:
