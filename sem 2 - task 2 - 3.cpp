@@ -6,24 +6,22 @@
 
 class Graph {
  public:
-  using ArcList = std::vector<std::pair<int, int>>;
+  using ArcList = std::vector<std::pair<std::pair<int, int>, double>>;
   explicit Graph(int size);
   void Insert(int from, int to, double converse);
-  [[nodiscard]] int VerticesCount() const;
-  [[nodiscard]] double GetWeight(int from, int to) const;
+  int VerticesCount() const;
+  double GetWeight(int from, int to) const;
   void FindAllAdjacentOut(int vertex, std::vector<int>& vertices) const;
 
  private:
   ArcList graph;
-  std::vector<std::vector<double>> weights;
   int size;
 };
 
-Graph::Graph(int size) : size(size), weights(size, std::vector<double>(size)) { };
+Graph::Graph(int size) : size(size) { };
 
 void Graph::Insert(int from, int to, double converse) {
-  graph.push_back({from, to});
-  weights[from][to] = converse;
+  graph.push_back({{from, to}, converse});
 }
 
 int Graph::VerticesCount() const {
@@ -31,14 +29,17 @@ int Graph::VerticesCount() const {
 }
 
 double Graph::GetWeight(int from, int to) const {
-  return weights[from][to];
+  for (auto i : graph)
+    if (i.first == std::make_pair(from, to))
+      return i.second;
+  return 0;
 }
 
 void Graph::FindAllAdjacentOut(int vertex, std::vector<int> &vertices) const {
   vertices.clear();
   for (auto i : graph)
-    if (i.first == vertex)
-      vertices.push_back(i.second);
+    if (i.first.first == vertex)
+      vertices.push_back(i.first.second);
 }
 
 // Обратная от релаксации функция
