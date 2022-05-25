@@ -1,5 +1,5 @@
 // https://contest.yandex.ru/contest/36361/problems/5
-// 67957793
+// 68605253
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -54,10 +54,12 @@ bool AntiRelax(int from, int to, const Graph& graph, std::vector<double>& dp) {
 // Алгоритм Беллмана-Форда, но с поиском положительных циклов
 bool IsArbitrage(const Graph& graph) {
   std::vector<double> dp(graph.VerticesCount());
-  std::vector<int> vertices;
+  std::vector<int> vertices(graph.VerticesCount());
 
   for (int start = 0; start < graph.VerticesCount(); start++) {
-    memset(&dp[0], -1e9, graph.VerticesCount() * sizeof(double));
+    // Для того, чтобы не объявлять вектор на каждой иттерации
+    // Я объявляю его вне цикла, а в цикле лишь устанавливаю нужные дефолтные значения
+    std::fill(vertices.begin(), vertices.end(), -1e9);
     dp[start] = 1;
 
     for (int step = 0; step < graph.VerticesCount() - 1; step++) {
