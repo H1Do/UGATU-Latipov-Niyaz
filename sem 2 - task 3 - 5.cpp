@@ -1,11 +1,11 @@
 // https://contest.yandex.ru/contest/37787/problems/5/
-// 68681900
+// 68724867
 #include <iostream>
 #include <vector>
 
 const int alphabet = UINT8_MAX + 1;
 
-void BuildSufMass(const std::string& str, std::vector<int>& result) {
+void BuildSufArray(const std::string& str, std::vector<int>& result) {
   int size = static_cast<int>(str.length() + 1);
 
   std::vector<int> cnt(alphabet);
@@ -57,7 +57,7 @@ void BuildSufMass(const std::string& str, std::vector<int>& result) {
 }
 
 void LCPKasai(const std::vector<int>& suf, const std::string& str, std::vector<int>& lcp) {
-  int size = static_cast<int>(str.length());
+  size_t size = str.length();
   std::vector<int> inverted_suf(suf.size());
 
   for (int i = 0; i < size; i++) inverted_suf[suf[i]] = i;
@@ -73,18 +73,20 @@ void LCPKasai(const std::vector<int>& suf, const std::string& str, std::vector<i
 }
 
 int FindAllSubstring(const std::string& str) {
-  int size = static_cast<int>(str.length());
+  size_t size = str.length();
   std::vector<int> suf_arr;
-  BuildSufMass(str, suf_arr);
+  BuildSufArray(str, suf_arr);
 
   std::vector<int> lcp(size);
   LCPKasai(suf_arr, str, lcp);
 
   int ans = 0;
-  for (int i = 0; i < size + 1; i++)
+  ans += size - suf_arr[size];
+  for (int i = 0; i < size; i++) {
     ans += size - suf_arr[i];
-  for (int i = 0; i < size; i++)
     ans -= lcp[i];
+  }
+
   return ans;
 }
 
