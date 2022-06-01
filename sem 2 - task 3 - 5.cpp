@@ -80,12 +80,9 @@ int FindAllSubstring(const std::string& str) {
   std::vector<int> lcp(size);
   LCPKasai(suf_arr, str, lcp);
 
-  int ans = 0;
-  ans += size - suf_arr[size];
-  for (int i = 0; i < size; i++) {
-    ans += size - suf_arr[i];
-    ans -= lcp[i];
-  }
+  int ans = size - suf_arr[size];;
+  for (int i = 0; i < size; i++)
+    ans += size - suf_arr[i] - lcp[i];
 
   return ans;
 }
