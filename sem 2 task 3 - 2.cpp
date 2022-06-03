@@ -1,10 +1,10 @@
 // https://contest.yandex.ru/contest/37787/problems/2_1
-// 68763761
+// 68765005	
 #include <iostream>
 #include <vector>
 
-void StrByPi(const std::vector<int>& pi, std::string& str) {
-  str = !pi.empty() ? "a" : "";
+std::string StrByPi(const std::vector<int>& pi) {
+  std::string str = !pi.empty() ? "a" : "";
 
   std::vector<int> spent_chars(26);
   char cur_char;
@@ -22,6 +22,7 @@ void StrByPi(const std::vector<int>& pi, std::string& str) {
       str += str[pi[i] - 1];
     }
   }
+  return str;
 }
 
 int main() {
@@ -31,9 +32,6 @@ int main() {
   while (std::cin >> number)
     pi.push_back(number);
 
-  std::string str;
-  StrByPi(pi, str);
-
-  std::cout << str << std::endl;
+  std::cout << StrByPi(pi); << std::endl;
   return 0;
 }
